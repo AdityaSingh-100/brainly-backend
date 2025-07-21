@@ -64,8 +64,26 @@ app.post("/api/v1/content", userMiddleWare, async function (req, res) {
     message: "Content Added",
   });
 });
-app.get("/api/v1/content", function (req, res) {});
-app.delete("/api/v1/content", function (req, res) {});
+
+app.get("/api/v1/content", userMiddleWare, async function (req, res) {
+  const userId = req.userId;
+  const content = await ContentModel.find({
+    userId: userId,
+  }).populate("userId", "username");
+  res.json({
+    content,
+  });
+});
+
+app.delete("/api/v1/content", async function (req, res) {
+  const contentId = req.body.contentId;
+
+  await ContentModel.deleteMany({
+    contentId,
+    userId: req.userId,
+  });
+});
+
 app.post("/api/v1/brain/share", function (req, res) {});
 app.get("/api/v1/brain/:shareLink", function (req, res) {});
 
