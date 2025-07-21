@@ -1,8 +1,18 @@
 import mongoose, { model, Schema } from "mongoose";
 
-mongoose.connect(
-  "mongodb+srv://admin:tSoA4IFvu9Q5ph3m@cluster0.x2erf5e.mongodb.net/brainly"
-);
+const connectDB = async () => {
+  try {
+    await mongoose.connect(
+      "mongodb+srv://admin:tSoA4IFvu9Q5ph3m@cluster0.x2erf5e.mongodb.net/brainly"
+    );
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
+  }
+};
+
+connectDB();
 
 const UserSchema = new Schema({
   username: { type: String, unique: true },
