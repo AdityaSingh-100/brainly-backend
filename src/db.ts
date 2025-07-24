@@ -29,3 +29,5 @@ const ContentSchema = new Schema({
 });
 
 export const ContentModel = model("Content", ContentSchema);
+
+// assignment: create /api/v1/brain/share & /api/v1/brain/:shareLink routes yourself, able to create tag also
