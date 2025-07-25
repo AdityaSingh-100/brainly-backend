@@ -27,7 +27,17 @@ const ContentSchema = new Schema({
   tags: [{ type: mongoose.Types.ObjectId, ref: "Tag" }],
   userId: { type: mongoose.Types.ObjectId, ref: "User" },
 });
+const LinkSchema = new Schema({
+  hash: String,
+  userId: {
+    type: mongoose.Types.ObjectId,
+    ref: "User",
+    required: true,
+    unique: true,
+  },
+});
 
+export const LinkModel = model("Links", LinkSchema);
 export const ContentModel = model("Content", ContentSchema);
 
 // assignment: create /api/v1/brain/share & /api/v1/brain/:shareLink routes yourself, able to create tag also

@@ -1,8 +1,9 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import { ContentModel, UserModel } from "./db";
+import { ContentModel, LinkModel, UserModel } from "./db";
 import { JWT_PASSWORD } from "./config";
 import { userMiddleWare } from "./middleware";
+import { random } from "./utils";
 
 const app = express();
 app.use(express.json());
@@ -84,9 +85,73 @@ app.delete("/api/v1/content", async function (req, res) {
   });
 });
 
-app.post("/api/v1/brain/share", function (req, res) {});
+app.post("/api/v1/brain/share", userMiddleWare, async function (req, res) {
+  const share = req.body.share;
+  if (share) {
+    const existingLink = await LinkModel.findOne({
+      userId: req.userId,
+    });
+    // here race condition occurs so we should avoid it
+    // also it me 2 person get value at same time
+    if (existingLink) {
+      res.json({
+        hash: existingLink.hash,
+      });
+      return;
+    }
+    const hash = random(10);
+    await LinkModel.create({
+      userId: req.userId,
+      hash: hash,
+    });
 
+    res.json({
+      message: "/share/" + hash,
+    });
+  } else {
+    LinkModel.deleteOne({
+      message: "Updated Shareble Link",
+    });
 
-app.get("/api/v1/brain/:shareLink", function (req, res) {});
+    res.json({
+      message: "Removed Link",
+    });
+  }
+});
+
+app.get("/api/v1/brain/:shareLink", async function (req, res) {
+  const hash = req.params.shareLink;
+
+  const link = await LinkModel.findOne({
+    hash,
+  });
+
+  if (!link) {
+    res.status(411).json({
+      message: "Sorry incorrect Input",
+    });
+    return;
+  }
+  // userId
+  const content = await ContentModel.find({
+    userId: link?.userId,
+  });
+
+  const user = await UserModel.findOne({
+    _id: link.userId,
+  });
+
+  if (!user) {
+    res.status(411).json({
+      message: "user not found, error should ideally not happen",
+    });
+    return;
+  }
+
+  res.json({
+    username: user.username,
+    content: content,
+  });
+});
 
 app.listen(3000);
