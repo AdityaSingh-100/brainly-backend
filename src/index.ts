@@ -4,9 +4,11 @@ import { ContentModel, LinkModel, UserModel } from "./db";
 import { JWT_PASSWORD } from "./config";
 import { userMiddleWare } from "./middleware";
 import { random } from "./utils";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.post("/api/v1/signup", async function (req, res) {
   //TODO - zod validation , hash the password
@@ -58,6 +60,7 @@ app.post("/api/v1/content", userMiddleWare, async function (req, res) {
   await ContentModel.create({
     link,
     type,
+    title: req.body.title,
     userId: req.userId,
     tags: [],
   });
